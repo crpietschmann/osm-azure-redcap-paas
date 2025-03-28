@@ -31,6 +31,9 @@ echo "extension=/usr/local/lib/php/extensions/no-debug-non-zts-20220829/mysqli.s
 #
 ####################################################################################
 
+echo "Testing DNS"
+nslookup "$APPSETTING_StorageAccount.blob.core.windows.net"
+
 redcapZipPath="/site/redcap.zip"
 
 cd /tmp
