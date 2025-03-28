@@ -31,7 +31,7 @@ echo "extension=/usr/local/lib/php/extensions/no-debug-non-zts-20220829/mysqli.s
 #
 ####################################################################################
 
-redcapZipPath="/tmp/redcap.zip"
+redcapZipPath="/site/redcap.zip"
 
 cd /tmp
 if [ -z "$APPSETTING_redcapAppZip" ]; then
