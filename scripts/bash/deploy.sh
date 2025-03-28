@@ -37,7 +37,7 @@ ls -al
 echo "Testing DNS"
 nslookup "$APPSETTING_StorageAccount.blob.core.windows.net"
 
-redcapZipPath="/site/redcap.zip"
+redcapZipPath="/tmp/redcap.zip"
 
 cd /tmp
 if [ -z "$APPSETTING_redcapAppZip" ]; then
@@ -73,6 +73,8 @@ else
   echo $(cat redcap.zip)
   exit 1
 fi
+
+ls -al /tmp/redcap.zip
 
 echo "Unzipping redcap.zip"
 
