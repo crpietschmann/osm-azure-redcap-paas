@@ -54,17 +54,18 @@ if [ -z "$APPSETTING_redcapAppZip" ]; then
   
   wget --method=post -O $redcapZipPath -q --body-data="username=$APPSETTING_redcapCommunityUsername&password=$APPSETTING_redcapCommunityPassword&version=$APPSETTING_zipVersion&install=1" --header=Content-Type:application/x-www-form-urlencoded https://redcap.vanderbilt.edu/plugins/redcap_consortium/versions.php
 
-  # check to see if the redcap.zip file contains the word error
-  if [ -z "$(grep -i error redcap.zip)" ]; then
-    echo "Downloaded REDCap zip file"
-  else
-    echo $(cat redcap.zip)
-    exit 1
-  fi
-
 else
   echo "Downloading REDCap zip file from storage"
-  wget -q -O $redcapZipPath $APPSETTING_redcapAppZip
+  wget -O $redcapZipPath $APPSETTING_redcapAppZip
+fi
+
+# check to see if the redcap.zip file contains the word error
+if [ -z "$(grep -i error redcap.zip)" ]; then
+  echo "Downloaded REDCap zip file"
+else
+  echo "Error downloading REDCap zip file"
+  echo $(cat redcap.zip)
+  exit 1
 fi
 
 echo "Unzipping redcap.zip"
