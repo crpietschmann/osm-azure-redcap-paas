@@ -19,7 +19,7 @@ stamp=$(date +%Y-%m-%d-%H-%M)
 #
 ####################################################################################
 
-echo "Configuring mysqli extension"
+echo "Configuring mysqli extension" >> /home/site/log-$stamp.txt
 mkdir -p /home/site/ini
 echo "extension=/usr/local/lib/php/extensions/no-debug-non-zts-20220829/mysqli.so" >> /home/site/ini/extensions.ini
 
@@ -35,20 +35,20 @@ redcapZipPath="/tmp/redcap.zip"
 
 cd /tmp
 if [ -z "$APPSETTING_redcapAppZip" ]; then
-  echo "Downloading REDCap zip file from REDCap Community site"
+  echo "Downloading REDCap zip file from REDCap Community site" >> /home/site/log-$stamp.txt
 
   if [ -z "$APPSETTING_redcapCommunityUsername" ]; then
-    echo "Missing REDCap Community site username."
+    echo "Missing REDCap Community site username." >> /home/site/log-$stamp.txt
     exit 1
   fi
 
   if [ -z "$APPSETTING_redcapCommunityPassword" ]; then
-    echo "Missing REDCap Community site password."
+    echo "Missing REDCap Community site password." >> /home/site/log-$stamp.txt
     exit 1
   fi
 
   if [ -z "$APPSETTING_zipVersion" ]; then
-    echo "zipVersion is null or empty. Setting to latest"
+    echo "zipVersion is null or empty. Setting to latest" >> /home/site/log-$stamp.txt
     export APPSETTING_zipVersion="latest"
   fi
   
@@ -56,23 +56,23 @@ if [ -z "$APPSETTING_redcapAppZip" ]; then
 
   # check to see if the redcap.zip file contains the word error
   if [ -z "$(grep -i error redcap.zip)" ]; then
-    echo "Downloaded REDCap zip file"
+    echo "Downloaded REDCap zip file" >> /home/site/log-$stamp.txt
   else
-    echo "Error downloading REDCap zip file"
-    echo $(cat redcap.zip)
+    echo $(cat redcap.zip) >> /home/site/log-$stamp.txt
     exit 1
   fi
+
 else
-  echo "Downloading REDCap zip file from storage"
-  wget "$APPSETTING_redcapAppZip" -O $redcapZipPath
+  echo "Downloading REDCap zip file from storage" >> /home/site/log-$stamp.txt
+  wget -q -O $redcapZipPath $APPSETTING_redcapAppZip
 fi
 
-echo "Unzipping redcap.zip"
+echo "Unzipping redcap.zip" >> /home/site/log-$stamp.txt
 
 rm -rf /home/site/wwwroot/*
 unzip -oq $redcapZipPath -d /tmp/wwwroot 
 
-echo "Moving REDCap files to wwwroot"
+echo "Moving REDCap files to wwwroot" >> /home/site/log-$stamp.txt
 
 mv -f /tmp/wwwroot/redcap/* /home/site/wwwroot/
 rm -rf /tmp/wwwroot
@@ -84,9 +84,9 @@ rm -f $redcapZipPath
 #
 ####################################################################################
 
-echo "Updating database connection info in database.php"
+echo "Updating database connection info in database.php" >> /home/site/log-$stamp.txt
 
-cd ~/site/wwwroot
+cd /home/site/wwwroot
 
 wget --no-check-certificate https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 
@@ -105,7 +105,7 @@ sed -i "s/$salt = '';/$salt = '$(echo $RANDOM | md5sum | head -c 20; echo;)';/" 
 #
 ####################################################################################
 
-echo "Configuring REDCap recommended settings"
+echo "Configuring REDCap recommended settings" >> /home/site/log-$stamp.txt
 
 sed -i "s|SMTP[[:space:]]*= ''|SMTP = '$APPSETTING_smtpFQDN'|" /home/site/repository/Files/settings.ini
 sed -i "s|smtp_port[[:space:]]*= |smtp_port = $APPSETTING_smtpPort|" /home/site/repository/Files/settings.ini
@@ -121,7 +121,7 @@ cp /home/site/repository/Files/settings.ini /home/site/ini/redcap.ini
 #
 ####################################################################################
 
-echo "For better security, it is recommended that you enable the session.cookie_secure option in your web server's PHP.INI file"
+echo "For better security, it is recommended that you enable the session.cookie_secure option in your web server's PHP.INI file" >> /home/site/log-$stamp.txt
 echo "session.cookie_secure = On" >> /home/site/ini/redcap.ini
 
 ####################################################################################
@@ -141,4 +141,4 @@ cp /home/site/repository/scripts/bash/postbuild.sh /home/site/deployments/tools/
 
 cp /home/site/repository/scripts/bash/startup.sh /home/startup.sh
 
-#echo "mysql: $(which mysql)"
+#echo "mysql: $(which mysql)" >> /home/site/log-$stamp.txt
