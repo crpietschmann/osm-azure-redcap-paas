@@ -31,10 +31,13 @@ echo "extension=/usr/local/lib/php/extensions/no-debug-non-zts-20220829/mysqli.s
 #
 ####################################################################################
 
+echo "Folder Contents"
+ls -al 
+
 echo "Testing DNS"
 nslookup "$APPSETTING_StorageAccount.blob.core.windows.net"
 
-redcapZipPath="~/site/redcap.zip"
+redcapZipPath="/site/redcap.zip"
 
 cd /tmp
 if [ -z "$APPSETTING_redcapAppZip" ]; then
@@ -90,7 +93,7 @@ rm -f $redcapZipPath
 
 echo "Updating database connection info in database.php"
 
-cd /home/site/wwwroot
+cd ~/site/wwwroot
 
 wget --no-check-certificate https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 
