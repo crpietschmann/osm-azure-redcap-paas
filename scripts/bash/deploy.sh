@@ -59,7 +59,7 @@ if [ -z "$APPSETTING_redcapAppZip" ]; then
 
 else
   echo "Downloading REDCap zip file from storage"
-  wget -O $redcapZipPath $APPSETTING_redcapAppZip
+  wget "$APPSETTING_redcapAppZip" -O $redcapZipPath
 fi
 
 # check to see if the redcap.zip file contains the word error
