@@ -90,19 +90,20 @@ param existingVirtualNetworkId string = ''
 param appServiceTimeZone string = 'UTC'
 
 var sequenceFormatted = format('{0:00}', sequence)
-var rgNamingStructure = replace(
-  replace(
-    replace(
-      replace(replace(namingConvention, '{rtype}', 'rg'), '{workloadName}', '${workloadName}-{rgName}'),
-      '{loc}',
-      location
-    ),
-    '{seq}',
-    sequenceFormatted
-  ),
-  '{env}',
-  environment
-)
+param resourceGroupName string 
+// var rgNamingStructure = replace(
+//   replace(
+//     replace(
+//       replace(replace(namingConvention, '{rtype}', 'rg'), '{workloadName}', '${workloadName}-{rgName}'),
+//       '{loc}',
+//       location
+//     ),
+//     '{seq}',
+//     sequenceFormatted
+//   ),
+//   '{env}',
+//   environment
+// )
 // The name of the VNet is either a new name or the name of the existing VNet parsed from the resource ID
 var vnetName = empty(existingVirtualNetworkId)
   ? nameModule[0].outputs.shortName
@@ -273,7 +274,7 @@ module kvSecretReferencesModule './modules/common/appSvcKeyVaultRefs.bicep' = {
 module virtualNetworkModule './modules/networking/main.bicep' = if (empty(existingVirtualNetworkId)) {
   name: take(replace(deploymentNameStructure, '{rtype}', 'network'), 64)
   params: {
-    resourceGroupName: replace(rgNamingStructure, '{rgName}', 'network')
+    resourceGroupName: resourceGroupName
     virtualNetworkName: vnetName
     vnetAddressPrefix: vnetAddressSpace
     location: location
@@ -291,7 +292,7 @@ module virtualNetworkModule './modules/networking/main.bicep' = if (empty(existi
 module monitoring './modules/monitoring/main.bicep' = {
   name: take(replace(deploymentNameStructure, '{rtype}', 'monitoring'), 64)
   params: {
-    resourceGroupName: replace(rgNamingStructure, '{rgName}', 'monitoring')
+    resourceGroupName: resourceGroupName
     appInsightsName: 'appInsights-${webAppName}'
     logAnalyticsWorkspaceName: lawName
     logAnalyticsWorkspaceSku: 'PerGB2018'
@@ -317,7 +318,7 @@ var virtualNetworkId = empty(existingVirtualNetworkId)
 module storageAccountModule './modules/storage/main.bicep' = {
   name: take(replace(deploymentNameStructure, '{rtype}', 'storage'), 64)
   params: {
-    resourceGroupName: replace(rgNamingStructure, '{rgName}', 'storage')
+    resourceGroupName: resourceGroupName
     location: location
     storageAccountName: strgName
     peSubnetId: privateEndpointSubnetId
@@ -344,7 +345,7 @@ module storageAccountModule './modules/storage/main.bicep' = {
 module keyVaultModule './modules/kv/main.bicep' = {
   name: take(replace(deploymentNameStructure, '{rtype}', 'keyVault'), 64)
   params: {
-    resourceGroupName: replace(rgNamingStructure, '{rgName}', 'keyVault')
+    resourceGroupName: resourceGroupName
     keyVaultName: kvName
     location: location
     tags: tags
@@ -375,7 +376,7 @@ module keyVaultModule './modules/kv/main.bicep' = {
 module mySqlModule './modules/sql/main.bicep' = {
   name: take(replace(deploymentNameStructure, '{rtype}', 'mysql'), 64)
   params: {
-    resourceGroupName: replace(rgNamingStructure, '{rgName}', 'database')
+    resourceGroupName: resourceGroupName
     flexibleSqlServerName: sqlName
     location: location
     tags: tags
@@ -418,12 +419,8 @@ module mySqlModule './modules/sql/main.bicep' = {
   }
 }
 
-resource webAppResourceGroup 'Microsoft.Resources/resourceGroups@2023-07-01' = {
-  name: replace(rgNamingStructure, '{rgName}', 'web')
-  location: location
-  tags: union(tags, {
-    workloadType: 'web'
-  })
+resource webAppResourceGroup 'Microsoft.Resources/resourceGroups@2023-07-01' existing = {
+  name: resourceGroupName
 }
 
 module webAppModule './modules/webapp/main.bicep' = {
